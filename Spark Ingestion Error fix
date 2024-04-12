@@ -38,3 +38,12 @@ if problematic_columns:
         print(f"Column: {col}, Error: {error}")
 else:
     print("No problematic columns found.")
+
+-------------------------------------------------
+try:
+    # Test simpler or different columns to isolate the issue
+    test_df = spark.sql("SELECT simple_column FROM `{schema_name}`.`{table_name}` LIMIT 1000")
+    test_df.show()
+except Exception as e:
+    print("Test query failed:", e)
+
