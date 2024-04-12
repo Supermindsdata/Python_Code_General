@@ -91,4 +91,48 @@ test_columns(schema_name, table_name, column_names)
     test_df.show()
 except Exception as e:
     print("Test query failed:", e)
+-------------------------------------
+from pyspark.sql import SparkSession
+from pyspark.sql.utils import AnalysisException
+
+def test_columns(schema_name, table_name, column_names):
+    # Create or get the Spark session
+    spark = SparkSession.builder.appName("Column Test").getOrCreate()
+
+    # List to hold names of problematic columns and their corresponding errors
+    problematic_columns = []
+
+    # Iterate over each column in the provided list and attempt to select it
+    for column in column_names:
+        try:
+            # Construct the SQL query to select one column
+            query = f"SELECT `{column}` FROM `{schema_name}`.`{table_name}` LIMIT 1000"
+            # Execute the query
+            df = spark.sql(query)
+            df.show()  # Show the results or use display(df) in notebooks like Databricks
+            print(f"Column {column} loaded successfully.")
+        except AnalysisException as e:
+            # Catch exceptions related to SQL analysis issues and store them
+            print(f"Error with column {column}: {str(e)}")
+            problematic_columns.append((column, str(e)))
+        except Exception as e:
+            # Catch all other exceptions
+            print(f"Unhandled error with column {column}: {str(e)}")
+            problematic_columns.append((column, str(e)))
+
+    # Print out problematic columns and their issues
+    if problematic_columns:
+        print("Problematic columns and their errors:")
+        for col, error in problematic_columns:
+            print(f"Column: {col}, Error: {error}")
+    else:
+        print("No problematic columns found.")
+
+# Example usage:
+schema_name = "RestartData"  # Replace with your actual schema name
+table_name = "FactInterventions"  # Replace with your actual table name
+column_names = ["column1", "column2", "column3"]  # Use your actual list of column names
+
+test_columns(schema_name, table_name, column_names)
+
 
