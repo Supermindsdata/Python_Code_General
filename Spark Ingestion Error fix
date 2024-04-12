@@ -1,0 +1,40 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.utils import AnalysisException
+
+# Create or get the Spark session
+spark = SparkSession.builder.appName("Column Test").getOrCreate()
+
+# Define the schema and table correctly
+schema_name = "RestartData"
+table_name = "FactInterventions"
+
+# Try to load the full table schema without data to find all column names
+try:
+    full_df = spark.sql(f"SELECT * FROM `{schema_name}`.`{table_name}` LIMIT 0")
+    columns = full_df.columns
+except Exception as e:
+    print("Failed to retrieve columns:", e)
+    columns = []
+
+# List to hold names of problematic columns and their corresponding errors
+problematic_columns = []
+
+# Iterate over each column and attempt to select it
+for column in columns:
+    try:
+        # Attempt to query the single column
+        query = f"SELECT `{column}` FROM `{schema_name}`.`{table_name}` LIMIT 1000"
+        df = spark.sql(query)
+        df.show()  # Show the results or use display(df) in notebooks like Databricks
+    except AnalysisException as e:
+        # Catch exceptions related to column issues and store them
+        print(f"Error with column {column}: {str(e)}")
+        problematic_columns.append((column, str(e)))
+
+# Print out problematic columns and their issues
+if problematic_columns:
+    print("Problematic columns and their errors:")
+    for col, error in problematic_columns:
+        print(f"Column: {col}, Error: {error}")
+else:
+    print("No problematic columns found.")
