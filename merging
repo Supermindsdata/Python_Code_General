@@ -11,3 +11,15 @@ df_merged = df_participants.merge(df_engagements, on='ParticipantID', how='inner
 print(df_merged.head())
 
 ----------------------------------------------------------
+
+import pandas as pd
+
+# Assuming df_interventions is already defined and loaded with data
+
+# Merging df_merged with df_interventions
+df_final = df_merged.merge(df_interventions, on='ParticipantID', how='left')
+
+# Display the first few rows of the final merged dataframe
+print(df_final.head())
+
+-----------------------------------------------------------
