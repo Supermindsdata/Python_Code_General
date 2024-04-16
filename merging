@@ -1,0 +1,13 @@
+import pandas as pd
+
+# Assuming you have the dataframes loaded as df_participants, df_engagements, df_demographics, and df_events
+
+# Merging the dataframes on 'ParticipantID'
+df_merged = df_participants.merge(df_engagements, on='ParticipantID', how='inner')\
+                           .merge(df_demographics, on='ParticipantID', how='inner')\
+                           .merge(df_events, on='ParticipantID', how='inner')
+
+# Display the first few rows of the merged dataframe
+print(df_merged.head())
+
+----------------------------------------------------------
