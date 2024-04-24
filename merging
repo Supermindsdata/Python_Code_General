@@ -23,3 +23,25 @@ df_final = df_merged.merge(df_interventions, on='ParticipantID', how='left')
 print(df_final.head())
 
 -----------------------------------------------------------
+import pandas as pd
+import nltk
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+# Sample DataFrame
+data = {'InterventionDetailsAndObjectivesDescription': ['The goal is to enhance job skills', 'Increase employment rate among graduates', 'Provide vocational training and support']}
+df = pd.DataFrame(data)
+
+# Text preprocessing
+df['cleaned'] = df['InterventionDetailsAndObjectivesDescription'].str.lower().str.replace(r'\W', ' ')
+
+# Tokenization
+df['tokens'] = df['cleaned'].apply(nltk.word_tokenize)
+
+# TF-IDF for keyword extraction
+vectorizer = TfidfVectorizer(max_features=5)  # Adjust number of features
+tfidf_matrix = vectorizer.fit_transform(df['cleaned'])
+feature_names = vectorizer.get_feature_names_out()
+
+print("Top keywords based on TF-IDF:")
+print(feature_names)
+-------------------------------------------------------------
