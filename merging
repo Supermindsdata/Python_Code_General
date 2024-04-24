@@ -73,3 +73,18 @@ feature_names = vectorizer.get_feature_names_out()
 print("Top keywords based on TF-IDF:")
 print(feature_names)
 --------------------------------------------------------
+Top keywords based on TF-IDF:
+['00' '01' '02' '03' '04' '05' '06' '07' '08' '09' '10' '11' '12' '13'
+ '14' '15' '2022' '2023' '2024' '22' '23' '24' '30' 'action' 'action plan'
+ 'adviser' 'advisor' 'agreed attend' 'agreed discussed' 'also'
+ 'application' 'apply' 'appointment' 'attend' 'co' 'co uk' 'coach'
+ 'complete' 'completed' 'contact' 'continue' 'course' 'cv' 'date'
+ 'discuss' 'email' 'employment' 'esol' 'face' 'face face' 'feedback'
+ 'fortnightly' 'get' 'help' 'ingeus' 'ingeus co' 'interview' 'iworks'
+ 'job' 'job search' 'jobs' 'keep' 'know' 'let' 'look' 'meeting' 'next'
+ 'next appointment' 'next face' 'next meeting' 'office' 'outcome'
+ 'participant' 'plan' 'progress' 'provide' 'ra' 'restart'
+ 'restart advisor' 'review' 'reviewed' 'role' 'roles' 'search' 'send'
+ 'session' 'skills' 'start' 'support' 'time' 'uk' 'update'
+ 'update advisor' 'updated' 'use' 'via' 'via email' 'work' 'work coach'
+ 'workshop']
