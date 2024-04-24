@@ -45,3 +45,31 @@ feature_names = vectorizer.get_feature_names_out()
 print("Top keywords based on TF-IDF:")
 print(feature_names)
 -------------------------------------------------------------
+import pandas as pd
+import nltk
+from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+# Make sure to download stopwords
+nltk.download('stopwords')
+nltk.download('punkt')
+
+# Sample DataFrame
+data = {'InterventionDetailsAndObjectivesDescription': ['The goal is to enhance job skills', 'Increase employment rate among graduates', 'Provide vocational training and support']}
+df = pd.DataFrame(data)
+
+# Text preprocessing
+df['cleaned'] = df['InterventionDetailsAndObjectivesDescription'].str.lower().str.replace(r'\W', ' ').str.replace(r'\d+', ' ')
+
+# Removing stopwords
+stop_words = set(stopwords.words('english'))
+df['filtered'] = df['cleaned'].apply(lambda x: ' '.join(word for word in x.split() if word not in stop_words))
+
+# TF-IDF for keyword extraction
+vectorizer = TfidfVectorizer(max_features=100, min_df=2, max_df=0.5, ngram_range=(1,2))  # Adjust parameters as needed
+tfidf_matrix = vectorizer.fit_transform(df['filtered'])
+feature_names = vectorizer.get_feature_names_out()
+
+print("Top keywords based on TF-IDF:")
+print(feature_names)
+--------------------------------------------------------
