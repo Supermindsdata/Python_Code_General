@@ -73,18 +73,66 @@ feature_names = vectorizer.get_feature_names_out()
 print("Top keywords based on TF-IDF:")
 print(feature_names)
 --------------------------------------------------------
-Top keywords based on TF-IDF:
-['00' '01' '02' '03' '04' '05' '06' '07' '08' '09' '10' '11' '12' '13'
- '14' '15' '2022' '2023' '2024' '22' '23' '24' '30' 'action' 'action plan'
- 'adviser' 'advisor' 'agreed attend' 'agreed discussed' 'also'
- 'application' 'apply' 'appointment' 'attend' 'co' 'co uk' 'coach'
- 'complete' 'completed' 'contact' 'continue' 'course' 'cv' 'date'
- 'discuss' 'email' 'employment' 'esol' 'face' 'face face' 'feedback'
- 'fortnightly' 'get' 'help' 'ingeus' 'ingeus co' 'interview' 'iworks'
- 'job' 'job search' 'jobs' 'keep' 'know' 'let' 'look' 'meeting' 'next'
- 'next appointment' 'next face' 'next meeting' 'office' 'outcome'
- 'participant' 'plan' 'progress' 'provide' 'ra' 'restart'
- 'restart advisor' 'review' 'reviewed' 'role' 'roles' 'search' 'send'
- 'session' 'skills' 'start' 'support' 'time' 'uk' 'update'
- 'update advisor' 'updated' 'use' 'via' 'via email' 'work' 'work coach'
- 'workshop']
+import pandas as pd
+import nltk
+from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+# Initialize stopwords
+nltk.download('stopwords')
+nltk.download('punkt')
+stop_words = set(stopwords.words('english'))
+
+# Adding custom stopwords
+custom_stopwords = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '2022', '2023', '2024', '22', '23', '24', '30', 'co', 'uk', 'via', 'email']
+stop_words.update(custom_stopwords)
+
+# Sample DataFrame
+data = {'InterventionDetailsAndObjectivesDescription': ['The goal is to enhance job skills', 'Increase employment rate among graduates', 'Provide vocational training and support']}
+df = pd.DataFrame(data)
+
+# Text preprocessing
+df['cleaned'] = df['InterventionDetailsAndObjectivesDescription'].str.lower().str.replace(r'\W', ' ').str.replace(r'\d+', ' ')
+
+# Removing stopwords
+df['filtered'] = df['cleaned'].apply(lambda x: ' '.join(word for word in x.split() if word not in stop_words))
+
+# TF-IDF for keyword extraction
+vectorizer = TfidfVectorizer(max_features=100, min_df=2, max_df=0.5, ngram_range=(1,2))  # Adjust parameters as needed
+tfidf_matrix = vectorizer.fit_transform(df['filtered'])
+feature_names = vectorizer.get_feature_names_out()
+
+print("Top keywords based on TF-IDF:")
+print(feature_names)
+--------------------------------------------------------------
+pip install spacy
+python -m spacy download en_core_web_sm
+
+import pandas as pd
+import spacy
+
+# Load spaCy's English NLP model
+nlp = spacy.load('en_core_web_sm')
+
+# Sample DataFrame (Replace this with your actual DataFrame)
+data = {
+    'InterventionDetailsAndObjectivesDescription': [
+        'The goal is to enhance job skills in New York',
+        'Increase employment rate among graduates from Stanford University',
+        'Provide vocational training and support in San Francisco'
+    ]
+}
+df = pd.DataFrame(data)
+
+# Function to extract entities
+def extract_entities(text):
+    doc = nlp(text)
+    entities = []
+    for ent in doc.ents:
+        entities.append((ent.text, ent.label_))
+    return entities
+
+# Apply the function to the DataFrame
+df['Entities'] = df['InterventionDetailsAndObjectivesDescription'].apply(extract_entities)
+
+print(df['Entities'])
