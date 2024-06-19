@@ -136,3 +136,14 @@ def extract_entities(text):
 df['Entities'] = df['InterventionDetailsAndObjectivesDescription'].apply(extract_entities)
 
 print(df['Entities'])
+
+
+-------------- Merging Dataframes ---------
+
+I have following spark dataframes
+engagements_sdf = spark.sql("SELECT * FROM RestartData.FactParticipantEngagements")
+demographics_sdf = spark.sql("SELECT * FROM RestartData.FactDemographics")
+interventions_sdf = spark.sql("SELECT * FROM RestartData.FactInterventions")
+events_sdf = spark.sql("SELECT * FROM RestartData.`Rst_vw_FactKeyEvents`")
+
+all the dataframes have one to one relationship with ParticipantID except for dataframe interventions_sdf where the relation of all other dataframes is 1 to many. I want to merge all dataframes
