@@ -314,6 +314,50 @@ final_df.show()
 
 
 ----------- encoding using pandas dataframe --------------
+from pyspark.sql import SparkSession
+import pandas as pd
+from pyspark.sql.functions import avg
+
+# Initialize Spark session
+spark = SparkSession.builder.appName("Data Preparation").getOrCreate()
+
+# Load dataframes (assuming they are already loaded as engagements_sdf, demographics_sdf, events_sdf, interventions_mapped_sdf)
+
+# Step 1: Convert Spark DataFrame to Pandas DataFrame
+interventions_pandas_df = interventions_mapped_sdf.toPandas()
+
+# Step 2: One-Hot Encode the Categorical Columns
+interventions_pandas_df = pd.get_dummies(interventions_pandas_df, columns=['AreaOfFocus', 'Level', 'Category'], prefix=['AreaOfFocus', 'Level', 'Category'])
+
+# Step 3: Aggregate the One-Hot Encoded Columns and Numerical Columns
+# List of columns to aggregate
+agg_columns = [col for col in interventions_pandas_df.columns if col.startswith('AreaOfFocus_') or col.startswith('Level_') or col.startswith('Category_')]
+
+# Creating aggregation dictionary
+agg_dict = {col: 'sum' for col in agg_columns}
+agg_dict['InterventionTotalDuration'] = 'mean'
+
+# Perform the aggregation
+interventions_agg_pandas_df = interventions_pandas_df.groupby('ParticipantID').agg(agg_dict).reset_index()
+
+# Step 4: Rename aggregated columns
+interventions_agg_pandas_df.rename(columns={'InterventionTotalDuration': 'AvgInterventionTotalDuration'}, inplace=True)
+
+# Step 5: Convert the Pandas DataFrame back to a Spark DataFrame
+interventions_agg_spark_df = spark.createDataFrame(interventions_agg_pandas_df)
+
+# Step 6: Left join engagements_sdf and demographics_sdf with events_sdf to retain all values of events_sdf
+merged_df = events_sdf.join(engagements_sdf, "ParticipantID", "left") \
+                      .join(demographics_sdf, "ParticipantID", "left")
+
+# Step 7: Left join the merged dataframe with aggregated interventions data on ParticipantID
+final_df = merged_df.join(interventions_agg_spark_df, "ParticipantID", "left")
+
+# Show the final prepared dataframe
+final_df.show()
+
+# If you want to save the final dataframe
+# final_df.write.format("csv").option("header", "true").save("/path/to/save/final_dataframe.csv")
 
 from pyspark.sql import SparkSession
 import pandas as pd
