@@ -194,3 +194,13 @@ AreaOfFocus
 Level
 Category
 MatchingKeywords
+
+--------------------- merging datagrames --------
+# Load dataframes (assuming they are already loaded as engagements_sdf, demographics_sdf, events_sdf, interventions_mapped_sdf)
+
+# Step 1: Left join engagements_sdf and demographics_sdf with events_sdf
+merged_df = events_sdf.join(engagements_sdf, "ParticipantID", "left") \
+                      .join(demographics_sdf, "ParticipantID", "left")
+
+# Step 2: Left join the merged dataframe with interventions_mapped_sdf on ParticipantID to retain all interventions
+final_df = merged_df.join(interventions_mapped_sdf, "ParticipantID", "left")
