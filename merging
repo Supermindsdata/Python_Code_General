@@ -315,8 +315,8 @@ final_df.show()
 
 ----------- encoding using pandas dataframe --------------
 
-from pyspark.sql import SparkSession
 import pandas as pd
+from pyspark.sql import SparkSession
 from pyspark.sql.functions import avg
 
 # Initialize Spark session
@@ -344,8 +344,12 @@ if 'ParticipantID' in interventions_pandas_df.columns:
 else:
     raise ValueError("ParticipantID column is missing from the dataframe")
 
-# Step 4: Rename aggregated columns
+# Step 4: Rename aggregated columns (if necessary)
 interventions_agg_pandas_df.rename(columns={'InterventionTotalDuration': 'AvgInterventionTotalDuration'}, inplace=True)
+
+# Select only the necessary columns
+selected_columns = ['ParticipantID', 'AvgInterventionTotalDuration'] + agg_columns
+interventions_agg_pandas_df = interventions_agg_pandas_df[selected_columns]
 
 # Step 5: Convert the Pandas DataFrame back to a Spark DataFrame
 interventions_agg_spark_df = spark.createDataFrame(interventions_agg_pandas_df)
@@ -362,6 +366,7 @@ final_df.show()
 
 # If you want to save the final dataframe
 # final_df.write.format("csv").option("header", "true").save("/path/to/save/final_dataframe.csv")
+
 
 
 
