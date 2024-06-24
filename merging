@@ -255,3 +255,61 @@ final_df.show()
 # If you want to save the final dataframe
 # final_df.write.format("csv").option("header", "true").save("/path/to/save/final_dataframe.csv")
 
+--------------- updated aggregation one hot encoding code -------------
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, when, avg, sum as _sum
+
+# Initialize Spark session
+spark = SparkSession.builder.appName("Data Preparation").getOrCreate()
+
+# Load dataframes (assuming they are already loaded as engagements_sdf, demographics_sdf, events_sdf, interventions_mapped_sdf)
+
+# Step 1: Get distinct values of columns
+area_of_focus_values = interventions_mapped_sdf.select("AreaOfFocus").distinct().rdd.flatMap(lambda x: x).collect()
+level_values = interventions_mapped_sdf.select("Level").distinct().rdd.flatMap(lambda x: x).collect()
+category_values = interventions_mapped_sdf.select("Category").distinct().rdd.flatMap(lambda x: x).collect()
+
+# Step 2: Create binary columns for each unique value in AreaOfFocus, Level, and Category
+for value in area_of_focus_values:
+    interventions_mapped_sdf = interventions_mapped_sdf.withColumn(f"AreaOfFocus_{value}", when(col("AreaOfFocus") == value, 1).otherwise(0))
+
+for value in level_values:
+    interventions_mapped_sdf = interventions_mapped_sdf.withColumn(f"Level_{value}", when(col("Level") == value, 1).otherwise(0))
+
+for value in category_values:
+    interventions_mapped_sdf = interventions_mapped_sdf.withColumn(f"Category_{value}", when(col("Category") == value, 1).otherwise(0))
+
+# Step 3: Aggregate binary columns to get count for each ParticipantID
+agg_exprs = [
+    avg("InterventionTotalDuration").alias("AvgInterventionTotalDuration")
+] + [
+    _sum(col(f"AreaOfFocus_{value}")).alias(f"AreaOfFocus_{value}") for value in area_of_focus_values
+] + [
+    _sum(col(f"Level_{value}")).alias(f"Level_{value}") for value in level_values
+] + [
+    _sum(col(f"Category_{value}")).alias(f"Category_{value}") for value in category_values
+]
+
+# Only select ParticipantID and the columns we are aggregating
+columns_to_select = ["ParticipantID"] + [f"AreaOfFocus_{value}" for value in area_of_focus_values] + \
+                    [f"Level_{value}" for value in level_values] + \
+                    [f"Category_{value}" for value in category_values] + ["InterventionTotalDuration"]
+
+interventions_mapped_sdf_selected = interventions_mapped_sdf.select(*columns_to_select)
+
+interventions_agg_sdf = interventions_mapped_sdf_selected.groupBy("ParticipantID").agg(*agg_exprs)
+
+# Step 4: Left join engagements_sdf and demographics_sdf with events_sdf to retain all values of events_sdf
+merged_df = events_sdf.join(engagements_sdf, "ParticipantID", "left") \
+                      .join(demographics_sdf, "ParticipantID", "left")
+
+# Step 5: Left join the merged dataframe with aggregated interventions data on ParticipantID
+final_df = merged_df.join(interventions_agg_sdf.select("ParticipantID", *[agg_col.alias(agg_col) for agg_col in interventions_agg_sdf.columns if agg_col != "ParticipantID"]), "ParticipantID", "left")
+
+# Show the final prepared dataframe
+final_df.show()
+
+# If you want to save the final dataframe
+# final_df.write.format("csv").option("header", "true").save("/path/to/save/final_dataframe.csv")
+
+
