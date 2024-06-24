@@ -338,8 +338,11 @@ agg_columns = [col for col in interventions_pandas_df.columns if col.startswith(
 agg_dict = {col: 'sum' for col in agg_columns}
 agg_dict['InterventionTotalDuration'] = 'mean'
 
-# Perform the aggregation
-interventions_agg_pandas_df = interventions_pandas_df.groupby('ParticipantID').agg(agg_dict).reset_index()
+# Ensure 'ParticipantID' is in the dataframe and perform the aggregation
+if 'ParticipantID' in interventions_pandas_df.columns:
+    interventions_agg_pandas_df = interventions_pandas_df.groupby('ParticipantID').agg(agg_dict).reset_index()
+else:
+    raise ValueError("ParticipantID column is missing from the dataframe")
 
 # Step 4: Rename aggregated columns
 interventions_agg_pandas_df.rename(columns={'InterventionTotalDuration': 'AvgInterventionTotalDuration'}, inplace=True)
@@ -359,6 +362,7 @@ final_df.show()
 
 # If you want to save the final dataframe
 # final_df.write.format("csv").option("header", "true").save("/path/to/save/final_dataframe.csv")
+
 
 
 
