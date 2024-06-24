@@ -147,3 +147,50 @@ interventions_sdf = spark.sql("SELECT * FROM RestartData.FactInterventions")
 events_sdf = spark.sql("SELECT * FROM RestartData.`Rst_vw_FactKeyEvents`")
 
 all the dataframes have one to one relationship with ParticipantID except for dataframe interventions_sdf where the relation of all other dataframes is 1 to many. I want to merge all dataframes
+
+---------- Column Names for mapped_interventions---------
+
+Column names in interventions_mapped_sdf:
+InterventionID
+ParticipantID
+OrganisationName
+InterventionTotalDuration
+InterventionStartDate
+InterventionDateAgreedDate
+InterventionToBeCompletedByDate
+InterventionEndDate
+InterventionSpecialistCompleteDate
+InterventionAddedDate
+InterventionCompleteDate
+InterventionLastUpdatedDate
+InterventionActivityTypeDescription
+InterventionDetailsAndObjectivesDescription
+InterventionEvidenceCompletionDescription
+InterventionLeftEarlyWithdrawnReasonDescription
+InterventionMandatedDescription
+InterventionOwnerDescription
+InterventionPersonalisedActionDescription
+InterventionSource1Description
+InterventionSource2Description
+InterventionSpecialistMethodOfContactDescription
+InterventionSpecialistNotesDescription
+InterventionSpecialistStatusDescription
+InterventionStatusDescription
+InterventionTypeDescription
+RecordLoadDate
+RecordModifiedDate
+RecordDataSource
+InterventionApprovalStatusDescription
+InterventionServiceTitleDescription
+InterventionServiceDeliveryMethodDescription
+InterventionServiceFundedUnfundedDescription
+InterventionServiceAccecptingReferralsDescription
+InterventionServiceUnitPrice
+InterventionServiceQuota
+InterventionServiceQuotaUsed
+InterventionPersonalisedAction
+ConcatenatedText
+AreaOfFocus
+Level
+Category
+MatchingKeywords
