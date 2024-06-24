@@ -337,17 +337,17 @@ agg_dict['InterventionTotalDuration'] = 'mean'
 
 interventions_agg_pandas_df = interventions_pandas_df.groupby('ParticipantID').agg(agg_dict).reset_index()
 
-# Rename aggregated columns
+# Step 4: Rename aggregated columns
 interventions_agg_pandas_df.rename(columns={'InterventionTotalDuration': 'AvgInterventionTotalDuration'}, inplace=True)
 
-# Step 4: Convert the Pandas DataFrame back to a Spark DataFrame
+# Step 5: Convert the Pandas DataFrame back to a Spark DataFrame
 interventions_agg_spark_df = spark.createDataFrame(interventions_agg_pandas_df)
 
-# Step 5: Left join engagements_sdf and demographics_sdf with events_sdf to retain all values of events_sdf
+# Step 6: Left join engagements_sdf and demographics_sdf with events_sdf to retain all values of events_sdf
 merged_df = events_sdf.join(engagements_sdf, "ParticipantID", "left") \
                       .join(demographics_sdf, "ParticipantID", "left")
 
-# Step 6: Left join the merged dataframe with aggregated interventions data on ParticipantID
+# Step 7: Left join the merged dataframe with aggregated interventions data on ParticipantID
 final_df = merged_df.join(interventions_agg_spark_df, "ParticipantID", "left")
 
 # Show the final prepared dataframe
@@ -355,6 +355,7 @@ final_df.show()
 
 # If you want to save the final dataframe
 # final_df.write.format("csv").option("header", "true").save("/path/to/save/final_dataframe.csv")
+
 
 
 
