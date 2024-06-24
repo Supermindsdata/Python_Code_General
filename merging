@@ -356,6 +356,108 @@ final_df.show()
 # If you want to save the final dataframe
 # final_df.write.format("csv").option("header", "true").save("/path/to/save/final_dataframe.csv")
 
+--------------------------- error --------------------
+AttributeError                            Traceback (most recent call last)
+/tmp/ipykernel_6193/4226285558.py in ?()
+      8 agg_columns = [col for col in interventions_pandas_df.columns if col.startswith('AreaOfFocus_') or col.startswith('Level_') or col.startswith('Category_')]
+      9 agg_dict = {col: 'sum' for col in agg_columns}
+     10 agg_dict['InterventionTotalDuration'] = 'mean'
+     11 
+---> 12 interventions_agg_pandas_df = interventions_pandas_df.groupby('ParticipantID').agg(agg_dict).reset_index()
+     13 
+     14 # Step 4: Rename aggregated columns
+     15 interventions_agg_pandas_df.rename(columns={'InterventionTotalDuration': 'AvgInterventionTotalDuration'}, inplace=True)
+
+~/cluster-env/trident_env/lib/python3.10/site-packages/pandas/core/groupby/generic.py in ?(self, func, engine, engine_kwargs, *args, **kwargs)
+   1265         relabeling, func, columns, order = reconstruct_func(func, **kwargs)
+   1266         func = maybe_mangle_lambdas(func)
+   1267 
+   1268         op = GroupByApply(self, func, args, kwargs)
+-> 1269         result = op.agg()
+   1270         if not is_dict_like(func) and result is not None:
+   1271             return result
+   1272         elif relabeling:
+
+~/cluster-env/trident_env/lib/python3.10/site-packages/pandas/core/apply.py in ?(self)
+    159         if isinstance(arg, str):
+    160             return self.apply_str()
+    161 
+    162         if is_dict_like(arg):
+--> 163             return self.agg_dict_like()
+    164         elif is_list_like(arg):
+    165             # we require a list, but not a 'str'
+    166             return self.agg_list_like()
+
+~/cluster-env/trident_env/lib/python3.10/site-packages/pandas/core/apply.py in ?(self)
+    416                 colg = obj._gotitem(selection, ndim=1)
+    417                 results = {key: colg.agg(how) for key, how in arg.items()}
+    418             else:
+    419                 # key used for column selection and output
+--> 420                 results = {
+    421                     key: obj._gotitem(key, ndim=1).agg(how) for key, how in arg.items()
+    422                 }
+    423 
+
+~/cluster-env/trident_env/lib/python3.10/site-packages/pandas/core/apply.py in ?(.0)
+    420     def agg_dict_like(self) -> DataFrame | Series:
+--> 421         """
+    422         Compute aggregation in the case of a dict-like argument.
+    423 
+    424         Returns
+
+~/cluster-env/trident_env/lib/python3.10/site-packages/pandas/core/groupby/generic.py in ?(self, func, engine, engine_kwargs, *args, **kwargs)
+    228             columns, func = validate_func_kwargs(kwargs)
+    229             kwargs = {}
+    230 
+    231         if isinstance(func, str):
+--> 232             return getattr(self, func)(*args, **kwargs)
+    233 
+    234         elif isinstance(func, abc.Iterable):
+    235             # Catch instances of lists / tuples
+
+~/cluster-env/trident_env/lib/python3.10/site-packages/pandas/core/groupby/groupby.py in ?(self, numeric_only, min_count, engine, engine_kwargs)
+   2259             # If we are grouping on categoricals we want unobserved categories to
+   2260             # return zero, rather than the default of NaN which the reindexing in
+   2261             # _agg_general() returns. GH #31422
+   2262             with com.temp_setattr(self, "observed", True):
+-> 2263                 result = self._agg_general(
+   2264                     numeric_only=numeric_only,
+   2265                     min_count=min_count,
+   2266                     alias="sum",
+
+~/cluster-env/trident_env/lib/python3.10/site-packages/pandas/core/groupby/groupby.py in ?(self, numeric_only, min_count, alias, npfunc)
+   1418         *,
+   1419         alias: str,
+   1420         npfunc: Callable,
+   1421     ):
+-> 1422         result = self._cython_agg_general(
+   1423             how=alias,
+   1424             alt=npfunc,
+   1425             numeric_only=numeric_only,
+
+~/cluster-env/trident_env/lib/python3.10/site-packages/pandas/core/groupby/groupby.py in ?(self, how, alt, numeric_only, min_count, **kwargs)
+   1504 
+   1505             return result
+   1506 
+   1507         new_mgr = data.grouped_reduce(array_func)
+-> 1508         res = self._wrap_agged_manager(new_mgr)
+   1509         out = self._wrap_aggregated_output(res)
+   1510         if self.axis == 1:
+   1511             out = out.infer_objects(copy=False)
+
+~/cluster-env/trident_env/lib/python3.10/site-packages/pandas/core/groupby/generic.py in ?(self, mgr)
+    140     def _wrap_agged_manager(self, mgr: Manager) -> Series:
+--> 141         return self.obj._constructor(mgr, name=self.obj.name)
+
+~/cluster-env/trident_env/lib/python3.10/site-packages/pandas/core/generic.py in ?(self, name)
+   5985             and name not in self._accessors
+   5986             and self._info_axis._can_hold_identifiers_and_holds_name(name)
+   5987         ):
+   5988             return self[name]
+-> 5989         return object.__getattribute__(self, name)
+
+AttributeError: 'DataFrame' object has no attribute 'name'
+
 
 
 
