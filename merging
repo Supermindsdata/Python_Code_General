@@ -420,14 +420,16 @@ merged_df = events_sdf.join(engagements_sdf_selected, "ParticipantID", "left") \
 final_df = merged_df.join(interventions_agg_spark_df, "ParticipantID", "left")
 
 # Step 9: Fill null values in one-hot encoded columns with 0
-for col_name in agg_columns:
-    final_df = final_df.withColumn(col_name, col(col_name).fillna(0))
+for column in final_df.columns:
+    if column.startswith('AreaOfFocus_') or column.startswith('Level_') or column.startswith('Category_'):
+        final_df = final_df.withColumn(column, col(column).fillna(0))
 
 # Show the final prepared dataframe
 final_df.show()
 
 # If you want to save the final dataframe
 # final_df.write.format("csv").option("header", "true").save("/path/to/save/final_dataframe.csv")
+
 
 
 
