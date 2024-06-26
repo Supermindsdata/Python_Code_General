@@ -81,3 +81,35 @@ plt.barh(range(len(indices)), importances[indices], color='violet', align='cente
 plt.yticks(range(len(indices)), [feature_names[i] for i in indices])
 plt.xlabel('Relative Importance')
 plt.show()
+
+################################# Function to print importane for top values #############
+def plot_top_values_by_percentage(df, column_name):
+    """
+    Plots a bar chart showing the top 50 values of a specified column by percentage.
+    """
+    # Calculate value counts for the specified column
+    value_counts_result = df[column_name].value_counts()
+
+    # Calculate percentages
+    total_values = len(df)
+    top_50_values = value_counts_result.head(50)
+    percentages = (top_50_values / total_values) * 100
+
+    # Create a color palette based on the size of the bars
+    colors = sns.color_palette("coolwarm", len(top_50_values))
+
+    # Create the bar chart
+    plt.figure(figsize=(12, 8))
+    bars = plt.barh(top_50_values.index, percentages, color=colors)
+    plt.xlabel('Percentage')
+    plt.ylabel(column_name)
+    plt.title(f'Top 50 {column_name} by Percentage')
+
+    # Add percentage labels on top of bars
+    for bar, percentage in zip(bars, percentages):
+        plt.text(bar.get_width() + 0.5, bar.get_y() + bar.get_height() / 2,
+                 f'{percentage:.2f}%', va='center', color='black')
+
+    plt.tight_layout()
+    plt.show()
+########################################
