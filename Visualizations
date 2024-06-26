@@ -121,7 +121,7 @@ import pandas as pd
 def plot_top_values_by_percentage(df, first_column, third_column):
     """
     Plots a bar chart showing the values of a specified first column by percentage,
-    based on the values in the third column.
+    based on the values in the third column, with individual bars and percentages for each value in the third column.
     """
     # Calculate value counts for the specified first column based on third column values
     grouped_df = df.groupby(third_column)[first_column].value_counts(normalize=True).unstack(fill_value=0)
@@ -135,13 +135,15 @@ def plot_top_values_by_percentage(df, first_column, third_column):
     colors = sns.color_palette("coolwarm", unique_values_third_col)
 
     # Create the bar chart
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=(14, 10))
     
-    bars = []
+    all_bars = []
+    labels = []
     for i, value in enumerate(df[third_column].unique()):
         subset = flat_df[flat_df[third_column] == value]
-        bar = plt.barh(subset[first_column], subset['percentage'] * 100, color=colors[i], alpha=0.7, label=value)
-        bars.append(bar)
+        bar = plt.barh(subset[first_column] + f' ({value})', subset['percentage'] * 100, color=colors[i], alpha=0.7)
+        all_bars.extend(bar)
+        labels.extend(subset.apply(lambda x: f'{x[first_column]} ({x[third_column]})', axis=1))
 
         # Add percentage labels on top of bars
         for bar, percentage in zip(bar, subset['percentage'] * 100):
@@ -151,10 +153,11 @@ def plot_top_values_by_percentage(df, first_column, third_column):
     plt.xlabel('Percentage')
     plt.ylabel(first_column)
     plt.title(f'{first_column} Distribution by {third_column}')
-    plt.legend(title=third_column)
+    plt.yticks(range(len(labels)), labels)
     plt.tight_layout()
     plt.show()
 
 # Example usage with a DataFrame 'df':
 # plot_top_values_by_percentage(df, 'FirstColumnName', 'ThirdColumnName')
+
 
