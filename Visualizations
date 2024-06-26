@@ -120,45 +120,41 @@ import pandas as pd
 
 def plot_top_values_by_percentage(df, first_column, third_column):
     """
-    Plots a bar chart showing the values of a specified first column by percentage,
-    based on the values in the third column, with grouped bars for each value in the first column.
+    Plots a stacked bar chart showing the values of a specified first column by percentage,
+    based on the values in the third column, with individual bars for each value in the first column.
     """
     # Calculate value counts for the specified first column based on third column values
-    grouped_df = df.groupby(third_column)[first_column].value_counts(normalize=True).unstack(fill_value=0)
+    grouped_df = df.groupby([first_column, third_column]).size().unstack(fill_value=0)
 
-    # Flatten the DataFrame
-    flat_df = grouped_df.stack().reset_index()
-    flat_df.columns = [third_column, first_column, 'percentage']
+    # Normalize to get percentages
+    percentages_df = grouped_df.div(grouped_df.sum(axis=1), axis=0) * 100
 
     # Create the color palette
     unique_values_third_col = df[third_column].nunique()
     colors = sns.color_palette("coolwarm", unique_values_third_col)
 
-    # Create the bar chart
-    plt.figure(figsize=(14, 10))
+    # Create the stacked bar chart
+    percentages_df.plot(kind='barh', stacked=True, color=colors, figsize=(14, 10))
 
-    all_bars = []
-    labels = []
-    for i, value in enumerate(df[third_column].unique()):
-        subset = flat_df[flat_df[third_column] == value]
-        bar = plt.barh(subset[first_column], subset['percentage'] * 100, color=colors[i], alpha=0.7, label=value)
-        all_bars.extend(bar)
-        labels.extend(subset[first_column].tolist())
-
-        # Add percentage labels on top of bars
-        for bar, percentage in zip(bar, subset['percentage'] * 100):
-            plt.text(bar.get_width() + 0.5, bar.get_y() + bar.get_height() / 2,
-                     f'{percentage:.2f}%', va='center', color='black')
+    # Add percentage labels on the bars
+    for i in range(len(percentages_df)):
+        total = 0
+        for j, value in enumerate(percentages_df.columns):
+            percentage = percentages_df.iloc[i][value]
+            if percentage > 0:
+                plt.text(total + (percentage / 2), i, f'{percentage:.2f}%', va='center', ha='center', color='black')
+                total += percentage
 
     plt.xlabel('Percentage')
     plt.ylabel(first_column)
     plt.title(f'{first_column} Distribution by {third_column}')
-    plt.legend(title=third_column)
+    plt.legend(title=third_column, bbox_to_anchor=(1.05, 1), loc='upper left')
     plt.tight_layout()
     plt.show()
 
 # Example usage with a DataFrame 'df':
 # plot_top_values_by_percentage(df, 'FirstColumnName', 'ThirdColumnName')
+
 
 
 
